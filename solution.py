@@ -1,5 +1,7 @@
 import requests
 import json
+import pandas as pd
+import csv
 
 from_currency = str(
     input("Enter from currency: ").upper())
@@ -28,3 +30,12 @@ print(conversion_object)
 print(conversion_value)
 
 #print(response.status_code) 
+
+#Esportiamo la risposta come testo leggibile con il valore di conversione e valuta
+results_export= "I dati della conversione è di " + str(conversion_value) + " " + to_currency  + " da " + str(amount) + " " + from_currency 
+print(results_export)
+
+#stampiamo la risposta come testo leggibile con il valore di conversione in csv
+f = open('results.csv','w')
+f.write(results_export) 
+f.close()
