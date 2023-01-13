@@ -1,41 +1,51 @@
 import requests
 import json
-import pandas as pd
 import csv
+from conversione import *
+import sqlite3
+import datetime
 
-from_currency = str(
-    input("Enter from currency: ").upper())
 
-to_currency = str(
-    input("Enter to currency: ").upper())
+conn = sqlite3.connect("logs.db")
+c = conn.cursor()
 
-amount = float(input("Enter amount: "))
+c.execute('''CREATE TABLE IF NOT EXISTS logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    from_currency TEXT NOT NULL, 
+    from_value INTEGER NOT NULL,
+    to_currency TEXT NOT NULL,
+    to_value INTEGER NOT NULL,
+    date DATE NOT NULL)''')
 
-response = requests.get(
-    f"https://api.frankfurter.app/latest?amount={amount}&from={from_currency}&to={to_currency}")
+conn.commit()
 
-#Carichiamo la risposta come testo
-data = json.loads(response.text)
+from_c = ""
 
-#Estrai oggetto contente oggeto con i valore di conversione e valuta
-conversion_object = data['rates']
+while from_c != "stop":
+    from_c = str(
+        input("Enter from currency: ").upper())
+        
+    to_c = str(
+        input("Enter to currency: ").upper())
 
-#Estrai solo il valore di conversione e valuta
-conversion_value = float(conversion_object[to_currency])
+    value = float(
+        input("Enter amount: "))
 
-print(data)
 
-print(conversion_object)
+    result = conv(from_c,to_c,value)
+    date=datetime.date.today()
 
-print(conversion_value)
+    print(result)
+
+
+    #create logs database
+    c.execute("INSERT INTO logs (from_currency, from_value,to_currency,to_value,date) VALUES (?,?,?,?,?)",(from_c,value,to_c,result,date))
+
+    conn.commit()
+conn.close()
 
 #print(response.status_code) 
 
 #Esportiamo la risposta come testo leggibile con il valore di conversione e valuta
-results_export= "I dati della conversione è di " + str(conversion_value) + " " + to_currency  + " da " + str(amount) + " " + from_currency 
-print(results_export)
-
-#stampiamo la risposta come testo leggibile con il valore di conversione in csv
-f = open('results.csv','w')
-f.write(results_export) 
-f.close()
+# results_export= "I dati della conversione è di " + str(conversion_value) + " " + to_currency  + " da " + str(amount) + " " + from_currency 
+# print(results_export)
